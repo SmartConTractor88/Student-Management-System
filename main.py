@@ -11,6 +11,7 @@ import sqlite3
 
 """one class for each window of the App"""
 
+
 class MainWindow(QMainWindow): 
 
     def __init__(self):
@@ -31,7 +32,7 @@ class MainWindow(QMainWindow):
 
         search_action = QAction("Search", self)
         edit_menu.addAction(search_action)
-        search_action.setMenuRole(QAction.MenuRole.NoRole)
+        search_action.triggered.connect(self.search)
 
         self.table = QTableWidget()
         self.table.setColumnCount(4)
@@ -55,7 +56,6 @@ class MainWindow(QMainWindow):
                                    QTableWidgetItem(str(data)))
         connection.close()
 
-        
     def insert(self):
         
         dialog = InsertDialog()
@@ -64,6 +64,7 @@ class MainWindow(QMainWindow):
     def search(self):
         dialog = SearchDialog()
         dialog.exec()
+
 
 class InsertDialog(QDialog): # create a dialog window
 
@@ -131,11 +132,12 @@ class InsertDialog(QDialog): # create a dialog window
         connection.close()
         main_window.load_data()
 
+
 class SearchDialog(QDialog):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Search Student Information")
+        self.setWindowTitle("Search Student")
         self.setFixedWidth(300)
         self.setFixedHeight(300)
     
@@ -151,7 +153,6 @@ class SearchDialog(QDialog):
         layout.addWidget(search_button)
 
         self.setLayout(layout) # apply the layout
-        self.layout.show()
 
     def search(self):
 
@@ -161,8 +162,8 @@ class SearchDialog(QDialog):
         cursor = connection.cursor()
         result = cursor.execute("SELECT * FROM students WHERE name = ?", (name, ))
 
-        rows = list(result)
-        print(rows)
+        row = list(result)
+        print(row)
         items = main_window.table.findItems(name, Qt.MatchFlag.MatchFixedString)
 
         for item in items:
