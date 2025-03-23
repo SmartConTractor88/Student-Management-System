@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QVBoxLayout, QLabel, QWidget, \
     QGridLayout, QLineEdit, QPushButton, QMainWindow, QTableWidget, \
-    QTableWidgetItem
+    QTableWidgetItem, QDialog, QComboBox
 
 from PyQt6.QtGui import QAction
 
@@ -19,6 +19,7 @@ class MainWindow(QMainWindow):
         help_menu = self.menuBar().addMenu("&Help")
 
         add_student_action = QAction("Add Student", self)
+        add_student_action.triggered.connect(self.insert)
         file_menu.addAction(add_student_action)
 
         about_action = QAction("About", self)
@@ -47,9 +48,65 @@ class MainWindow(QMainWindow):
                                    QTableWidgetItem(str(data)))
         connection.close()
 
-        #grid = QGridLayout()
-        #self.setLayout(grid)
+        
+    def insert(self):
+        
+        dialog = InsertDialog()
+        dialog.exec()
 
+class InsertDialog(QDialog): # create a dialog window
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Insert Student Data")
+        self.setFixedWidth(300)
+        self.setFixedHeight(300)
+
+        # Student Name
+        layout = QVBoxLayout()
+        self.student_name = QLineEdit()
+        self.student_name.setPlaceholderText("Name")
+        layout.addWidget(self.student_name)
+
+        # Combo Box of Courses
+        self.course_name = QComboBox() # establish a selectbox widget
+        courses = ["Business Administration","Computer Science",
+                   "International Relations","Design/Marketing",
+                   "Sports Management","Computer Engineering",
+                   "Cybersecurity","Economics"]
+        self.course_name.addItems(courses) # include the items of the list
+        layout.addWidget(self.course_name) # add widget to the layout
+
+        # Type Phone Number
+        self.phone_number = QLineEdit()
+        self.phone_number.setPlaceholderText("Phone number")
+        layout.addWidget(self.phone_number)
+
+        # Submit Button
+        submit = QPushButton("Submit")
+        submit.clicked.connect(self.add_student)
+        layout.addWidget(submit)
+
+        self.setLayout(layout) # apply the layout
+
+    def add_student(self):
+        
+        stud_id = 000
+        stud_id = str(stud_id)
+        name = self.student_name.text()
+        course = self.course_name.itemText(self.course_name.currentIndex())
+        phone_number = self.phone_number.text()
+        # Connect to the Database
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO students VALUES (?,?,?,?)", 
+                       (stud_id, name, course, phone_number))
+        
+        connection.commit # Apply the query to the SQL database
+        cursor.close()
+        connection.close()
+        run_app.load_data()
+        
 
 app = QApplication(sys.argv)
 run_app = MainWindow() # create main window
