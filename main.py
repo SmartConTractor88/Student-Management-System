@@ -91,8 +91,21 @@ class InsertDialog(QDialog): # create a dialog window
 
     def add_student(self):
         
-        stud_id = 000
-        stud_id = str(stud_id)
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        
+        cursor.execute("SELECT MAX(id) FROM students")
+        last_id = cursor.fetchone()[0]  # look for highest id
+
+        # if no students exist, start from 1; otherwise, increment the last id
+        if last_id is None:
+            stud_id = 1
+        else:
+            stud_id = last_id + 1
+
+        # format the new ID
+        formatted_id = f"{stud_id:05d}"
+        
         name = self.student_name.text()
         course = self.course_name.itemText(self.course_name.currentIndex())
         phone_number = self.phone_number.text()
@@ -102,7 +115,7 @@ class InsertDialog(QDialog): # create a dialog window
         cursor.execute("INSERT INTO students VALUES (?,?,?,?)", 
                        (stud_id, name, course, phone_number))
         
-        connection.commit # Apply the query to the SQL database
+        connection.commit() # Apply the query to the SQL database
         cursor.close()
         connection.close()
         run_app.load_data()
