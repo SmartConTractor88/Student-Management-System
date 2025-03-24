@@ -31,6 +31,7 @@ class MainWindow(QMainWindow):
         about_action = QAction("About", self)
         help_menu.addAction(about_action)
         about_action.setMenuRole(QAction.MenuRole.NoRole)
+        about_action.triggered.connect(self.about)
 
         search_action = QAction(QIcon("icons/search.png"), "Search", self)
         edit_menu.addAction(search_action)
@@ -107,6 +108,21 @@ class MainWindow(QMainWindow):
         dialog = DeleteDialog()
         dialog.exec()
 
+    def about(self):
+        dialog = AboutDialog()
+        dialog.exec()
+
+class AboutDialog(QMessageBox):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("About the App")
+
+        content = """
+        This app stores student information and makes 
+        it easy to navigate and modify SQL data.
+        """
+        self.setText(content)
+    
 
 class EditDialog(QDialog): 
    
@@ -210,6 +226,7 @@ class DeleteDialog(QDialog):
         confirmation_widget = QMessageBox()
         confirmation_widget.setText("Record was deleted successfully.")
         confirmation_widget.exec()
+
 
 class InsertDialog(QDialog): # create a dialog window
 
