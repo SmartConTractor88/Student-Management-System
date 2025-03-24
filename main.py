@@ -108,8 +108,68 @@ class MainWindow(QMainWindow):
 
 
 class EditDialog(QDialog): 
-    pass
+   
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Edit Record")
+        self.setFixedWidth(300)
+        self.setFixedHeight(400)
 
+        # Student Name
+        layout = QVBoxLayout()
+
+        # Get student name
+        index = main_window.table.currentRow()
+        name = main_window.table.item(index, 1).text()
+
+        # Get id from selected row
+        self.student_id = main_window.table.item(index, 0).text()
+
+        # Add student name widget
+        self.student_name = QLineEdit(name)
+        self.student_name.setPlaceholderText("Name")
+        layout.addWidget(self.student_name)
+
+        # Combo Box of Courses
+        course_name = main_window.table.item(index, 2).text()
+        self.course_name = QComboBox() # establish a selectbox widget
+        courses = [" ","Business Administration","Computer Science",
+                   "International Relations","Design/Marketing",
+                   "Sports Management","Computer Engineering",
+                   "Cybersecurity","Economics"]
+        self.course_name.addItems(courses) # include the items of the list
+        self.course_name.setCurrentText(course_name)
+        layout.addWidget(self.course_name) # add widget to the layout
+
+        # Type Phone Number
+        phone_number = main_window.table.item(index, 3).text()
+        self.phone_number = QLineEdit(phone_number)
+        self.phone_number.setPlaceholderText("Phone number")
+        layout.addWidget(self.phone_number)
+
+        # Submit Button
+        update = QPushButton("Update")
+        update.clicked.connect(self.update_student)
+        layout.addWidget(update)
+
+        self.setLayout(layout) # apply the layout
+
+    def update_student(self):
+
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute("UPDATE students SET name = ?, course = ?, "
+        "mobile = ? WHERE id = ?", 
+        (self.student_name.text(), 
+         self.course_name.itemText(self.course_name.currentIndex()), 
+         self.phone_number.text(), 
+         self.student_id))
+        
+        connection.commit()
+        cursor.close()
+        connection.close()
+        # refresh the table
+        main_window.load_data()
 
 class DeleteDialog(QDialog):
     pass
